@@ -14,13 +14,16 @@ type hooker struct {
 
 type M bson.M
 
-func NewHooker(mgoUrl, db, collection string) (*hooker, error) {
+func NewHooker(mgoUrl, db, collection string, cleanup bool) (*hooker, error) {
 	session, err := mgo.Dial(mgoUrl)
 	if err != nil {
 		return nil, err
 	}
-
-	return &hooker{c: session.DB(db).C(collection)}, nil
+    c := session.DB(db).C(collection)
+    if cleanup {
+        c.DropCollection()
+    }
+	return &hooker{c: c}, nil
 }
 
 func (h *hooker) Fire(entry *logrus.Entry) error {
