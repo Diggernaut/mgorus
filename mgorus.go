@@ -14,7 +14,7 @@ type hooker struct {
 
 type M bson.M
 
-func NewHooker(mgoUrl, db, collection string, cleanup bool, key [][]string) (*hooker, error) {
+func NewHooker(mgoUrl, db, collection string, cleanup bool, key []mgo.Index) (*hooker, error) {
 	session, err := mgo.Dial(mgoUrl)
 	if err != nil {
 		return nil, err
@@ -26,12 +26,7 @@ func NewHooker(mgoUrl, db, collection string, cleanup bool, key [][]string) (*ho
     }
 
 	for x := range key {
-		index := mgo.Index{
-			Key:        key[x],
-			Background: true,
-			Sparse:     true,
-		}
-		err = c.EnsureIndex(index)
+		err = c.EnsureIndex(key[x])
 		if err != nil {
 			panic(err)
 		}
